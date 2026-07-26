@@ -1,3 +1,5 @@
+const FIXED_NOW = Date.UTC(2026, 0, 15, 12, 0, 0);
+
 function hashSeed(input: string): number {
   let h = 0;
   for (let i = 0; i < input.length; i++) {
@@ -62,36 +64,59 @@ function assetPoolFor(network: string) {
   return ASSET_POOL[network] ?? ASSET_POOL.ethereum!;
 }
 
+function mockCounterparty(network: string, seed: number): string {
+  const hex = seed.toString(16).padStart(8, "0");
+  const tail = (seed % 0xffff).toString(16).padStart(4, "0");
+
+  if (network === "bitcoin") return `bc1q${hex}${tail}`;
+  if (network === "solana") return `${hex}${tail}SoLaddrMock111111111`;
+  return `0x${hex}…${tail}`;
+}
+
 export function getMockAssets(address: string, network: string): Asset[] {
   const rand = mulberry32(hashSeed(address + network));
   const pool = assetPoolFor(network);
   const count = 1 + Math.floor(rand() * pool.length);
+
   return pool.slice(0, count).map((a) => {
     const balance = Number((rand() * (a.symbol === "BTC" ? 2.5 : 120) + 0.01).toFixed(6));
     const valueUsd = Number((balance * a.price).toFixed(2));
-    return { symbol: a.symbol, name: a.name, balance, priceUsd: a.price, valueUsd };
+    return {
+      symbol: a.symbol,
+      name: a.name,
+      balance,
+      priceUsd: a.price,
+      valueUsd,
+    };
   });
 }
 
 export function getMockActivity(address: string, network: string): Activity[] {
   const rand = mulberry32(hashSeed(address + ":" + network));
   const pool = assetPoolFor(network);
-  const now = Date.now();
   const items: Activity[] = [];
+
   for (let i = 0; i < 8; i++) {
     const asset = pool[Math.floor(rand() * pool.length)]!;
     const type = ACTIVITY_TYPES[Math.floor(rand() * ACTIVITY_TYPES.length)]!;
     const amount = Number((rand() * 15 + 0.001).toFixed(4));
     const daysAgo = Math.floor(rand() * 45);
+    const seed = hashSeed(`${address}:${network}:${i}`);
+
     items.push({
-      id: `tx-${hashSeed(address)}-${i}`,
+      id: `tx-${seed}`,
       type,
       asset: asset.symbol,
       amount,
-      counterparty: `0x${hashSeed(address + i).toString(16).padStart(8, "0")}…${(hashSeed(String(i)) % 0xffff).toString(16)}`,
-      timestamp: new Date(now - daysAgo * 86400000 - Math.floor(rand() * 86400000)).toISOString(),
+      counterparty: mockCounterparty(network, seed),
+      timestamp: new Date(
+        FIXED_NOW - daysAgo * 86400000 - Math.floor(rand() * 86400000)
+      ).toISOString(),
       status: rand() > 0.15 ? "confirmed" : "pending",
     });
   }
-  return items.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+  return items.sort(
+    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+  );
 }
