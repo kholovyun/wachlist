@@ -1,0 +1,156 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Wallet Watchlist API",
+    "version": "1.0.0",
+    "description": "Manage crypto wallet watchlist entries and inspect mocked portfolio/activity data."
+  },
+  "servers": [{ "url": "http://localhost:4000" }],
+  "paths": {
+    "/api/health": {
+      "get": {
+        "summary": "Liveness probe",
+        "responses": {
+          "200": {
+            "description": "Process is up",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "ok": { "type": "boolean" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ready": {
+      "get": {
+        "summary": "Readiness probe (SQLite reachable)",
+        "responses": {
+          "200": { "description": "Ready" },
+          "503": { "description": "Not ready" }
+        }
+      }
+    },
+    "/api/wallets": {
+      "get": {
+        "summary": "List wallets",
+        "responses": {
+          "200": { "description": "Wallet list" }
+        }
+      },
+      "post": {
+        "summary": "Create wallet",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateWallet" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Created" },
+          "400": { "description": "Validation failed" },
+          "409": { "description": "Duplicate address on network" }
+        }
+      }
+    },
+    "/api/wallets/{id}": {
+      "get": {
+        "summary": "Get wallet",
+        "parameters": [{ "$ref": "#/components/parameters/WalletId" }],
+        "responses": {
+          "200": { "description": "Wallet" },
+          "404": { "description": "Not found" }
+        }
+      },
+      "patch": {
+        "summary": "Update wallet label/notes",
+        "parameters": [{ "$ref": "#/components/parameters/WalletId" }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateWallet" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Updated" },
+          "400": { "description": "Validation failed" },
+          "404": { "description": "Not found" }
+        }
+      },
+      "delete": {
+        "summary": "Delete wallet",
+        "parameters": [{ "$ref": "#/components/parameters/WalletId" }],
+        "responses": {
+          "204": { "description": "Deleted" },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
+    "/api/wallets/{id}/assets": {
+      "get": {
+        "summary": "Mock portfolio assets",
+        "parameters": [{ "$ref": "#/components/parameters/WalletId" }],
+        "responses": {
+          "200": { "description": "Assets" },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
+    "/api/wallets/{id}/activity": {
+      "get": {
+        "summary": "Mock activity",
+        "parameters": [{ "$ref": "#/components/parameters/WalletId" }],
+        "responses": {
+          "200": { "description": "Activity" },
+          "404": { "description": "Not found" }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "WalletId": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": { "type": "string", "format": "uuid" }
+      }
+    },
+    "schemas": {
+      "CreateWallet": {
+        "type": "object",
+        "required": ["address", "label", "network"],
+        "properties": {
+          "address": { "type": "string" },
+          "label": { "type": "string", "maxLength": 80 },
+          "network": {
+            "type": "string",
+            "enum": ["ethereum", "bitcoin", "solana", "polygon"]
+          },
+          "notes": { "type": "string", "maxLength": 500 }
+        }
+      },
+      "UpdateWallet": {
+        "type": "object",
+        "properties": {
+          "label": { "type": "string", "maxLength": 80 },
+          "notes": { "type": "string", "maxLength": 500 }
+        }
+      }
+    }
+  }
+}
