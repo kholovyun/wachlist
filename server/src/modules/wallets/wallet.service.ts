@@ -18,17 +18,19 @@ export const walletService = {
   },
 
   create(input: CreateWalletInput) {
-    if (walletRepository.findByAddress(input.address)) {
-      throw conflict("A wallet with this address already exists");
+    if (walletRepository.findByAddressAndNetwork(input.address, input.network)) {
+      throw conflict("A wallet with this address already exists on this network");
     }
     return walletRepository.create(input);
   },
 
   update(id: string, input: UpdateWalletInput) {
     const current = this.getById(id);
+
     if (input.label === undefined && input.notes === undefined) {
       return current;
     }
+
     return walletRepository.update(id, input);
   },
 

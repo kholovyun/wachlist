@@ -18,10 +18,13 @@ export const walletRepository = {
     return row ? mapWalletRow(row) : null;
   },
 
-  findByAddress(address: string): Wallet | null {
+  findByAddressAndNetwork(address: string, network: string): Wallet | null {
     const row = db
-      .prepare("SELECT * FROM wallets WHERE lower(address) = lower(?)")
-      .get(address) as WalletRow | undefined;
+      .prepare(
+        `SELECT * FROM wallets
+         WHERE lower(address) = lower(?) AND network = ?`
+      )
+      .get(address, network) as WalletRow | undefined;
     return row ? mapWalletRow(row) : null;
   },
 
