@@ -99,7 +99,12 @@ Flow on the API: route → controller → service → repository.
 ## Notes
 
 - Started from scratch, no starter kit
+- API is split into route → controller → service → repository so HTTP and DB stay separate
+- Zod validates create/update; invalid address comes back as field errors for the form
+- Same address can exist on different networks; unique key is `(address, network)`
 - SQLite file in `server/data` (tests use `WALLET_DB_PATH`)
-- Mocks are deterministic from address + network
-- No auth for this demo
-- Skipped pagination and real chain calls on purpose
+- Portfolio/activity are mocked and deterministic from address + network
+- UI is plain Ant Design tables/forms — no heavy state library for three screens
+- Can run with npm or Docker; Docker keeps DB in a volume
+- Added request ids, `/api/ready`, swagger and a few API tests when there was time left
+- No auth, pagination or real chain calls — out of scope for this demo
