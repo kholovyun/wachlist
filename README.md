@@ -8,19 +8,45 @@ Portfolio data is mocked.
 - API: Node.js, Express, TypeScript, Zod, SQLite
 - UI: React, Vite, React Router, Ant Design
 
-## Run
+## How to run
+
+Two options, whichever is easier.
+
+### Local (npm)
 
 ```bash
 npm run install:all
 npm run dev
 ```
 
-- API: http://localhost:4000
-- UI: http://localhost:5173
-- Docs: http://localhost:4000/api/docs
+Then open http://localhost:5173  
+API is on http://localhost:4000, swagger at `/api/docs`.
+
+API tests:
 
 ```bash
 npm run test:server
+```
+
+### Docker
+
+If you don't want to install deps locally, just spin it up with Docker.
+Docker Desktop needs to be running.
+
+```bash
+docker compose up --build
+```
+
+- UI: http://localhost:8080
+- API: http://localhost:4000
+- Docs: http://localhost:8080/api/docs
+
+SQLite lives in the `wallet-data` volume, so wallets survive restarts.
+
+Stop it with:
+
+```bash
+docker compose down
 ```
 
 ## API

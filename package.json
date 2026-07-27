@@ -9,7 +9,9 @@
     "dev:client": "npm --prefix client run dev",
     "start:server": "npm --prefix server run start",
     "test:server": "npm --prefix server run test",
-    "build:client": "npm --prefix client run build"
+    "build:client": "npm --prefix client run build",
+    "docker:up": "docker compose up --build",
+    "docker:down": "docker compose down"
   },
   "devDependencies": {
     "concurrently": "^9.2.1"

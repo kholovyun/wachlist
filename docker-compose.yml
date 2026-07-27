@@ -1,0 +1,22 @@
+services:
+  api:
+    build: ./server
+    ports:
+      - "4000:4000"
+    environment:
+      PORT: 4000
+      WALLET_DB_PATH: /app/data/wallets.db
+    volumes:
+      - wallet-data:/app/data
+    restart: unless-stopped
+
+  web:
+    build: ./client
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  wallet-data:
